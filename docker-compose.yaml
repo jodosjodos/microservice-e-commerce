@@ -1,65 +1,74 @@
 services:
-  postgres:
+  postgresql:
     container_name: ms_pg_sql
     image: postgres
     environment:
       POSTGRES_USER: jodos
-      POSTGRES_PASSWORD: jodos2006
-      PGDATA: /var/lib/postgresql/data
+      POSTGRES_PASSWORD: jodos
+      PGDATA: /data/postgres
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - postgres:/data/postgres
     ports:
-      - 5432:5432
+      - "5432:5432"
     networks:
-      - microservice-net
+      - microservices-net
     restart: unless-stopped
 
   pgadmin:
     container_name: ms_pgadmin
     image: dpage/pgadmin4
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin@pgadmin.org}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:
       - pgadmin:/var/lib/pgadmin
     ports:
-      - 5050:80
+      - "5050:80"
     networks:
-      - microservice-net
+      - microservices-net
     restart: unless-stopped
 
   mongodb:
-    container_name: ms_mongo_db
     image: mongo
+    container_name: mongo_db
     ports:
       - 27017:27017
     volumes:
       - mongo:/data
     environment:
-      MONGO_INITDB_ROOT_USERNAME: jodos
-      MONGO_INITDB_ROOT_PASSWORD: jodos
-
-  mongo_express:
-    container_name: ms_mongo_express
-    image: mongo-express
+      - MONGO_INITDB_ROOT_USERNAME=jodos
+      - MONGO_INITDB_ROOT_PASSWORD=jodos
+    networks:
+      - microservices-net
     restart: unless-stopped
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo_express
+    restart: always
     ports:
       - 8081:8081
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: jodos
-      ME_CONFIG_MONGODB_ADMINPASSWORD: jodos
-      ME_CONFIG_MONGODB_SERVER: mongo
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=jodos
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=jodos
+      - ME_CONFIG_MONGODB_SERVER=mongo_db  # Ensure the correct service name
+    networks:
+      - microservices-net
+    depends_on:
+      - mongodb
 
   mail-dev:
-    container_name: ms_mail_dev
+    container_name: ms-mail-dev
     image: maildev/maildev
     ports:
       - 1080:1080
       - 1025:1025
+    networks:
+      - microservices-net
 
 networks:
-  microservice-net:
+  microservices-net:
     driver: bridge
 
 volumes:
