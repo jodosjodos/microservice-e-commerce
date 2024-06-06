@@ -25,7 +25,7 @@ public class CustomerService {
     public Void updateCustomer(CustomerRequest request) {
         var customer =
                 repo.findById(request.id()).orElseThrow(() -> new CustomerNotFoundException(format("can't update customer :: No customer found with provided ID : %S",
-                request.id())));
+                        request.id())));
         mergeCustomer(customer,
                 request);
         repo.save(customer);
@@ -50,5 +50,9 @@ public class CustomerService {
 
     public List<CustomerResponse> findAllCustomers() {
         return repo.findAll().stream().map(mapper::fromCustomer).collect(Collectors.toList());
+    }
+
+    public Boolean existsById(String customerId) {
+        return repo.findById(customerId).isPresent();
     }
 } 
