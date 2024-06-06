@@ -62,7 +62,7 @@ public class CustomerService {
                         customerId)));
     }
 
-    public Void deleteCustomer(String customerId) {
+    public void deleteCustomer(String customerId) {
         repo.deleteById(customerId);
     }
 }
